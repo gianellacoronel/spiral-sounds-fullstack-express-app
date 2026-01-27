@@ -8,6 +8,8 @@ Challenge:
     1. Use express.static() to serve all the files in 'public'.
 */
 
+app.use(express.static("public"));
+
 app
   .listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

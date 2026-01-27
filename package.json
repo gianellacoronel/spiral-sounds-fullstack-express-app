@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Online classic vinyl store",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app/issues"
   },
-  "homepage": "https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app#readme"
+  "homepage": "https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }
