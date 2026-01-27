@@ -1,0 +1,19 @@
+{
+  "name": "spiral-sounds",
+  "version": "1.0.0",
+  "description": "Online classic vinyl store",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app.git"
+  },
+  "author": "Gianella Coronel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app/issues"
+  },
+  "homepage": "https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app#readme"
+}
