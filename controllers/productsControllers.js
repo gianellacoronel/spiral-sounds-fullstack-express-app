@@ -49,12 +49,34 @@ export async function getProducts(req, res) {
     Example incoming query: '?genre=rock'
     */
     const params = [];
-    const { genre } = req.query;
+    const { genre, search } = req.query;
 
     if (genre) {
       query += ` WHERE genre = ?`;
       params.push(genre);
     }
+
+    /*
+    Challenge:
+
+    1. When the user inputs text into the search box, that
+      text will be passed to the server as a query string.
+      We should serve products where the search text finds
+      a match with the title, artist, or genre. We are accepting
+      partial matching queries, so "lo" would match with "block"
+      and "slow" and "allow".
+
+    hint.md for help!
+
+    Example incoming query: '?search=lo'
+    */
+
+    if (search) {
+      query += ` WHERE title LIKE ? OR artist LIKE ? or genre LIKE ?`;
+      const searchPattern = `%${search}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+
     const products = await db.all(query, params);
     res.json(products);
   } catch (err) {
