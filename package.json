@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/gianellacoronel/spiral-sounds-fullstack-express-app#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   }
 }
