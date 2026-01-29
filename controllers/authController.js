@@ -56,6 +56,13 @@ export async function registerUser(req, res) {
       [name, email, username, hashed],
     );
 
+    /*
+    Challenge:
+      1. Store the 'lastID' from the database insertion above to the 'userId' property on the 'session' object on the request. This will bind our logged in user to the session.
+    */
+
+    req.session.userId = result.lastID;
+
     res.status(201).json({ message: "User registered" });
   } catch (err) {
     console.error("Registration error:", err.message);

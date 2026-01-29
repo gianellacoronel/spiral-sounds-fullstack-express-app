@@ -1,12 +1,11 @@
 import express from "express";
 import { productsRouter } from "./routes/products.js";
 import { authRouter } from "./routes/auth.js";
+import session from "express-session";
 
 const app = express();
 const PORT = 8000;
-
-app.use(express.static("public"));
-
+const secret = process.env.SPIRAL_SESSION_SECRET || "jellyfish-baskingshark";
 /*
 Challenge:
 
@@ -16,6 +15,21 @@ Challenge:
 //Without this middleware, we will have req.body = undefined
 // This use the upcoming json and passes it to the req.body
 app.use(express.json());
+
+app.use(
+  session({
+    secret: secret,
+    resave: false,
+    saveUninitialized: false, // Prevents empty session from being stored
+    cookie: {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    },
+  }),
+);
+
+app.use(express.static("public"));
 
 app.use("/api/products", productsRouter);
 app.use("/api/auth", authRouter);
