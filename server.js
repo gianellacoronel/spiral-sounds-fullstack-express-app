@@ -1,5 +1,6 @@
 import express from "express";
 import { productsRouter } from "./routes/products.js";
+import { authRouter } from "./routes/auth.js";
 
 const app = express();
 const PORT = 8000;
@@ -7,16 +8,17 @@ const PORT = 8000;
 app.use(express.static("public"));
 
 /*
-Challenge 2:
+Challenge:
 
-- Handle any request to /api/products and pass it to productsRouter.
-
-- Save and reload the mini browser.
-  You should see the results of the console.logs from productsControllers.js
+1. What middleware do we need to make this work?
 
 */
+//Without this middleware, we will have req.body = undefined
+// This use the upcoming json and passes it to the req.body
+app.use(express.json());
 
 app.use("/api/products", productsRouter);
+app.use("/api/auth", authRouter);
 
 app
   .listen(PORT, () => {
