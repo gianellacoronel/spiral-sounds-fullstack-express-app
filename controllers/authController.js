@@ -1,24 +1,8 @@
 import validator from "validator";
+import { getDBConnection } from "../db/db.js";
 
 export async function registerUser(req, res) {
   let { name, email, username, password } = req.body;
-
-  /*
-Challenge:
-1. Validate the incoming user data.
-  - Make sure all fields are present.
-  - Remove any whitespace where appropriate.
-  - Use regex /^[a-zA-Z0-9_-]{1,20}$/ to check the username contains only the allowed characters.
-  - Use the Validator package to check the email format is valid.
-
-If fields are not present, the username uses disallowed characters, or the email address is not of a valid format, end the response with a suitable code and send an error object with a suitable message. For example:
-
-   { error: 'All fields are required.' }
-
-  - Test with console.logs.
-
-hint.md for help!
-*/
 
   if (!name || !email || !username || !password) {
     return res.status(400).json({ error: "All fields are required." });
@@ -28,7 +12,7 @@ hint.md for help!
   email = email.trim();
   username = username.trim();
 
-  if (/^[a-zA-Z0-9_-]{1,20}$/.test(username)) {
+  if (!/^[a-zA-Z0-9_-]{1,20}$/.test(username)) {
     return res.status(400).json({
       error:
         "Username must be 1–20 characters, using letters, numbers, _ or -.",
@@ -37,5 +21,44 @@ hint.md for help!
 
   if (!validator.isEmail(email)) {
     return res.status(400).json({ error: "Invalid email format" });
+  }
+
+  try {
+    const db = await getDBConnection();
+
+    /*
+Challenge:
+1. Check if the username or email address has already been used.
+    - If it has, end the response with a suitable status code and this object:
+      { error: 'Email or username already in use.' }.
+
+    - If the username and email address are unique in the database, add the user to the table and send this JSON { message: 'User registered'}. Which status code should you use?
+
+- When you have been successful, the mini browser will redirect to the homepage.
+
+- Run logTable.js to check you have created a user.
+
+- You will be able to see the password in the db! We will fix that later!
+*/
+
+    const query = `SELECT id FROM users WHERE username = ? OR email = ?`;
+    const params = [username, email];
+
+    const validUniqueUser = await db.get(query, params);
+
+    if (validUniqueUser) {
+      return res
+        .status(400)
+        .json({ error: "There is a user with same username or email" });
+    }
+
+    const insertQuery = `INSERT INTO users(name, email, username, password) VALUES (?, ?, ?, ?)`;
+    const newUserParams = [name, email, username, password];
+
+    const result = await db.run(insertQuery, newUserParams);
+    res.status(201).json({ message: "User registered" });
+  } catch (err) {
+    console.error("Registration error:", err.message);
+    res.status(500).json({ error: "Registration failed. Please try again." });
   }
 }
