@@ -1,5 +1,6 @@
 import validator from "validator";
 import { getDBConnection } from "../db/db.js";
+import bcrypt from "bcrypt";
 
 export async function registerUser(req, res) {
   let { name, email, username, password } = req.body;
@@ -24,38 +25,37 @@ export async function registerUser(req, res) {
   }
 
   try {
+    /*
+    Challenge:
+      1. Import the bcryptjs package.
+      2. Use it to hash the incoming password just before it's stored in the database.
+        - Use a cost-factor of 10
+
+    To test, sign up a new user and run logTable.js.
+
+    hint.md for help!
+    */
+
+    const hashed = await bcrypt.hash(password, 10);
+
     const db = await getDBConnection();
 
-    /*
-Challenge:
-1. Check if the username or email address has already been used.
-    - If it has, end the response with a suitable status code and this object:
-      { error: 'Email or username already in use.' }.
+    const existing = await db.get(
+      "SELECT id FROM users WHERE email = ? OR username = ?",
+      [email, username],
+    );
 
-    - If the username and email address are unique in the database, add the user to the table and send this JSON { message: 'User registered'}. Which status code should you use?
-
-- When you have been successful, the mini browser will redirect to the homepage.
-
-- Run logTable.js to check you have created a user.
-
-- You will be able to see the password in the db! We will fix that later!
-*/
-
-    const query = `SELECT id FROM users WHERE username = ? OR email = ?`;
-    const params = [username, email];
-
-    const validUniqueUser = await db.get(query, params);
-
-    if (validUniqueUser) {
+    if (existing) {
       return res
         .status(400)
-        .json({ error: "There is a user with same username or email" });
+        .json({ error: "Email or username already in use." });
     }
 
-    const insertQuery = `INSERT INTO users(name, email, username, password) VALUES (?, ?, ?, ?)`;
-    const newUserParams = [name, email, username, password];
+    const result = await db.run(
+      "INSERT INTO users (name, email, username, password) VALUES (?, ?, ?, ?)",
+      [name, email, username, hashed],
+    );
 
-    const result = await db.run(insertQuery, newUserParams);
     res.status(201).json({ message: "User registered" });
   } catch (err) {
     console.error("Registration error:", err.message);
