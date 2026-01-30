@@ -152,3 +152,16 @@ hint.md for help!
 
   res.status(204).send();
 }
+
+export async function deleteAll(req, res) {
+  const db = await getDBConnection();
+
+  /*
+Challenge:
+1. Delete all cart items for a user.
+*/
+  await db.run(`DELETE FROM cart_items WHERE user_id = ?`, [
+    req.session.userId,
+  ]);
+  res.status(204).send();
+}
