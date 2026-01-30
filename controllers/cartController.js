@@ -120,3 +120,35 @@ Loads of help in hint.md
 
   return res.json({ items: productsByUser });
 }
+
+export async function deleteItem(req, res) {
+  const db = await getDBConnection();
+  /*
+Challenge:
+1. When a user clicks the delete button, that item should be deleted from the cart_items table, regardless of quantity.
+
+2. Research Challenge: You need to think about how to end the response! What status code should you use, and what method? (Clue: it’s not the json() method!)
+
+hint.md for help!
+*/
+  const itemId = parseInt(req.params.itemId, 10);
+  if (isNaN(itemId)) {
+    return res.status(400).json({ error: "Invalid item ID" });
+  }
+
+  const item = await db.get(
+    "SELECT quantity FROM cart_items WHERE id = ? AND user_id = ?",
+    [itemId, req.session.userId],
+  );
+
+  if (!item) {
+    return res.status(400).json({ error: "Item not found" });
+  }
+
+  await db.run("DELETE FROM cart_items WHERE id = ? AND user_id = ?", [
+    itemId,
+    req.session.userId,
+  ]);
+
+  res.status(204).send();
+}
