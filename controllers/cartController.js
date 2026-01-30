@@ -24,23 +24,49 @@ Loads of help in hint.md
     return res.status(400).json({ error: "Invalid product ID" });
   }
 
-  if (!req.session.userId) {
-    return res.status(400).json({ error: "You're not logged in" });
-  }
+  const userId = req.session.userId;
 
-  const querySearchItem = `SELECT * FROM cart_items WHERE userId = ? AND product_id = ?`;
-  const paramsSearchItem = [userId, productId];
-  const itemExists = await db.get(querySearchItem, paramsSearchItem);
+  const existing = await db.get(
+    "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ?",
+    [userId, productId],
+  );
 
-  if (itemExists) {
-    const queryUpdateItem = `UPDATE cart_items SET quantity = quantity + 1 WHERE id = ?`;
-    const paramsUpdateItem = [itemExists.id];
-    await db.run(queryUpdateItem, paramsUpdateItem);
+  if (existing) {
+    await db.run("UPDATE cart_items SET quantity = quantity + 1 WHERE id = ?", [
+      existing.id,
+    ]);
   } else {
-    const queryAddItem = `INSERT INTO cart_items(user_id, product_id, quantity)
-  VALUES (?, ?, ?)`;
-    const paramsAddItem = [req.session.userId, productId, 1];
-    await db.run(queryAddItem, paramsAddItem);
+    await db.run(
+      "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, 1)",
+      [userId, productId],
+    );
   }
-  return res.status(201).json({ message: "Added to cart" });
+
+  res.json({ message: "Added to cart" });
+}
+
+export async function getCartCount(req, res) {
+  const db = await getDBConnection();
+
+  /*
+Challenge:
+
+1. Write code to ensure that when a logged-in user clicks 'Add to Cart', their current cart count is shown in the header with a cart icon. The frontend has been done for you. All the backend need do is provide the following JSON on the /api/cart/cart-count endpoint:
+{ <THE TOTAL NUMBER OF THE USER'S ITEMS> || 0 }
+
+Ignore frontend console errors for now!
+
+For testing, log in with:
+Username: test
+Password: test
+
+Loads of help in hint.md
+*/
+
+  const result = await db.get(
+    `SELECT SUM(quantity) AS totalItems FROM cart_items WHERE user_id = ?`,
+    [req.session.userId],
+  );
+
+  res.json({ totalItems: result.totalItems || 0 });
 }
