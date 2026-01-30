@@ -123,3 +123,23 @@ hint.md for help.
     res.status(500).json({ error: "Login failed. Please try again." });
   }
 }
+
+/*
+Challenge:
+1. Create a function which logs out the user.
+- You can use the .destroy() method directly on the session.
+- .destroy() takes a callback function which you can use to send a confirmation response with this JSON:
+  { message: 'Logged out' }
+
+You will need to write code here and in one other place!
+
+Test with:
+username: test
+password: test
+*/
+
+export async function logoutUser(req, res) {
+  req.session.destroy(() => {
+    res.json({ message: "Logged out" });
+  });
+}
